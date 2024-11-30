@@ -128,16 +128,17 @@ bool IKSolver::solveIK(
     const geometry_msgs::Pose& target_pose, const std::string& ee_frame,
     moveit::core::RobotState& robot_state,
     trajectory_msgs::JointTrajectoryPoint& point) {
+  auto planning_scene = planning_scene_monitor::LockedPlanningSceneRW(psm_);
   // Set up the validation callback to make sure we don't collide with the
   // environment
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn =
-      [this, &jmg, &robot_state](const geometry_msgs::Pose& pose,
-                                 const std::vector<double>& joints,
-                                 moveit_msgs::MoveItErrorCodes& error_code) {
+      [this, &jmg, &robot_state, &planning_scene](
+          const geometry_msgs::Pose& pose, const std::vector<double>& joints,
+          moveit_msgs::MoveItErrorCodes& error_code) {
         robot_state.setJointGroupPositions(jmg.get(), joints);
         robot_state.update(true);
         collision_detection::CollisionResult::ContactMap contacts;
-        (*planning_scene_)->getCollidingPairs(contacts, robot_state);
+        planning_scene->getCollidingPairs(contacts, robot_state);
 
         if (contacts.size() == 0) {
           error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
@@ -238,10 +239,7 @@ ap_planning::Result IKSolver::plan(const APPlanningRequest& req,
     return INVALID_GOAL;
   }
 
-  planning_scene_.reset();
   psm_->requestPlanningSceneState();
-  planning_scene_ =
-      std::make_shared<planning_scene_monitor::LockedPlanningSceneRO>(psm_);
 
   setUp(res);
 
@@ -281,13 +279,14 @@ ap_planning::Result IKSolver::plan(const APPlanningRequest& req,
     // Calculate a bunch of starting joint configs
     size_t i = 0;
     constexpr size_t num_starts = 20;
+    auto planning_scene = planning_scene_monitor::LockedPlanningSceneRW(psm_);
     while (starts.size() < num_starts && i < 2 * num_starts && ros::ok()) {
       // Every time, we set to random states to get variety in solutions
       current_state->setToRandomPositions(joint_model_group_.get());
       current_state->update(true);
 
       // Try to add a goal configuration
-      increaseStateList(joint_model_group_, current_state, *planning_scene_,
+      increaseStateList(joint_model_group_, current_state, planning_scene,
                         ik_solver_, first_pose, starts);
 
       i++;

@@ -3,6 +3,7 @@
 //      Project   : ap_planning
 //      Created   : 07/27/2022
 //      Author    : Adam Pettinger
+//      Edited    : Akita
 //      Copyright : Copyright© The University of Texas at Austin, 2014-2022. All
 //      rights reserved.
 //
@@ -49,7 +50,8 @@ enum Result {
   INVALID_GOAL,
   NO_IK_SOLUTION,
   INVALID_TRANSITION,
-  PLANNING_FAIL
+  PLANNING_FAIL,
+  PARTIAL_SUCCESS
 };
 
 enum ScrewPathType { CHAINED, UNCHAINED };

@@ -3,6 +3,7 @@
 //      Project   : ap_planning
 //      Created   : 07/27/2022
 //      Author    : Adam Pettinger
+//      Edited    : Akita 
 //      Copyright : Copyright© The University of Texas at Austin, 2014-2022. All
 //      rights reserved.
 //
@@ -51,7 +52,7 @@ const double CONDITION_NUM_LIMIT = 100;
 class IKSolver : public IKSolverBase {
  public:
   IKSolver(){};
-  ~IKSolver() { planning_scene_.reset(); };
+  ~IKSolver(){};
 
   /** Initializes the solver by looking up ROS parameters for:
    *
@@ -125,9 +126,7 @@ class IKSolver : public IKSolverBase {
   // This holds the kinematics solver
   kinematics::KinematicsBasePtr ik_solver_;
 
-  planning_scene_monitor::PlanningSceneMonitorPtr psm_;
-  std::shared_ptr<planning_scene_monitor::LockedPlanningSceneRO>
-      planning_scene_;
+  planning_scene_monitor::PlanningSceneMonitorPtr psm_;  
 
   // Planning parameters
   double joint_tolerance_;
